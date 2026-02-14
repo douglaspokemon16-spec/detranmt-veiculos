@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Débitos do Veículo</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="shortcut icon" type="image/x-icon" href="/assets/icone_mt.png">
+  <style>
+        body {
+            background: #f5f5f5;
+            min-width:335px;
+        }
+        .custom-container {
+            padding: 20px;
+            border-radius: 0;
+            margin-bottom: 20px;
+            background: #fff;
+            box-shadow: -1px 2px 4px 0px #3333333b;
+        }
+        .vehicle-data h2 {
+            font-weight: 600;
+            font-size: 22px;
+        }
+        .vehicle-data li {
+            list-style-type: none;
+            margin-bottom: 5px;
+            padding-left: 0;
+            display: inline-block;
+            margin-right: 20px;
+        }
+        .table thead th {
+            border-bottom: 2px solid #fff;
+            color: #fff;
+            font-weight: 400;
+            font-size: 14px;
+        }
+        tbody {
+            background: #f5f5f5;
+        }
+        tr.selectable-row {
+            border-bottom: solid 5px #fff;
+            border-top: solid 5px #fff;
+            font-size: 14px !important;
+        }
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #327dff;
+            margin-top: 8px;
+            margin-right: -12px;
+        }
+        .subtotal-total {
+            margin-top: 5px;
+            text-align: left;
+            font-size: 16px;
+            color:#757575;
+        }
+        .pay-via-pix button {
+            background-color: #336699;
+            border-color: #336699;
+            color: #ffffff;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <!-- Imagem buscada da pasta Débitos do Veículo_files -->
+    <img src="./Débitos do Veículo_files/headermt.png" style="width: 100%;max-width: 700px; margin: auto;">
+</header>
+
+<div id="subheader">
+  Data: <span id="data-atual"></span>
+</div>
+
+<div class="container mt-3 custom-container" style="margin-top: 30px !important;">
+  <button type="button" onclick="window.location.href='/fazenda/detran/ipva/';" style="background: #ffffff; display: inline-block; font-size: 14px; padding: 4px 8px; border: 1px solid #336699; color: #336699; border-radius: 4px; cursor: pointer; margin-bottom: 15px;">Voltar</button>
+
+  <div class="vehicle-data">
+    <h2>Dados do veículo</h2>
+    <div class="conteudo">
+      <ul>
+        <li style="display: none;">Nome: <span id="nome-prop">**</span></li>
+        <li style="display: none;">CPF/CNPJ: <span id="cpf-cnpj">**</span></li>
+        <li><i class="fas fa-map-marker-alt"></i> Município: <span id="municipio"></span></li>
+        <li><i class="fas fa-calendar-alt"></i> Ano: <span id="ano"></span></li>
+        <li><i class="fas fa-car"></i> Modelo: <span id="modelo"></span></li>
+        <li style="display: none;">Renavam: <span id="renavam"></span></li>
+        <li><i class="fas fa-id-card"></i> Placa: <span id="placa"></span></li>
+        <li><i class="fas fa-barcode"></i> Chassi: <span id="chassi"></span></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="container mt-3 custom-container">
+  <div class="vehicle-data">
+    <h2>Todos seus débitos em aberto</h2>
+    <p>Selecione diversas parcelas para pagar em um único pagamento</p>
+    <div class="conteudo" style="overflow-x: scroll;">
+        <table class="table cabecalho" style="width: 100%; min-width: 800px;">
+            <thead style="background: #336699; color: #fff;">
+                <tr>
+                  <th width="30"></th>
+                  <th>DÉBITO</th>
+                  <th>VENCIMENTO</th>
+                  <th>VALOR</th>
+                  <th>JUROS</th>
+                  <th>MULTA</th>
+                  <th>DESCONTOS</th>
+                  <th>VALOR TOTAL</th>
+                </tr>
+            </thead>
+            <tbody id="tabela-debitos-body">
+              <!-- Linhas inseridas dinamicamente -->
+            </tbody>
+        </table>
+    </div>
+    <div class="selecionarTodosDebitos" style="height: 40px; display: flex; align-items: center; margin-top: 5px;">
+      <input type="checkbox" class="selecionartodosdebitos" id="selecionartodosdebitos" style="margin-right: 10px;">
+      <label for="selecionartodosdebitos">Selecionar todos os débitos disponíveis para pagamento.</label>
+    </div>
+  </div>
+</div>
+
+<div class="container mt-3 custom-container">
+  <div class="vehicle-data">
+    <div class="subtotal-total">
+        <p><strong>Subtotal:</strong> <span id="subtotal" data-subtotal="0.00">R$ 0,00</span></p>
+        <p><strong>Juros:</strong> <span id="jurossubtotal" data-jurossubtotal="0.00">R$ 0,00</span></p>
+        <p><strong>Multa:</strong> <span id="multasubtotal" data-multasubtotal="0.00">R$ 0,00</span></p>
+        <p><strong>Descontos:</strong> <span id="descontossubtotal" data-descontossubtotal="0.00">R$ 0,00</span></p>
+        <p><strong>Total:</strong> <span id="total" data-total="0.00">R$ 0,00</span></p>
+    </div>
+    <div class="pay-via-pix">
+      <button class="btn btn-primary pagar-pix" style="background-color: #336699; border-color: #336699; color: #fff; border-radius: 0;"><i class="fa-brands fa-pix me-2"></i>Pagar via Pix</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal PIX -->
+<div class="modal fade" id="modalPix" tabindex="-1" role="dialog" aria-labelledby="modalPixLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Pagamento por Pix</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body modalbodypix">
+        <div class="loadingPix" style="width: 100%; display: flex; align-items: center; justify-content: center; margin-top: 20px;">
+          <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Carregando...</span>
+          </div>
+        </div>
+        <div class="pix-details" style="display: none;">
+          <div class="row">
+            <div class="col-md-6 text-center">
+              <h6>Leia o QR Code</h6>
+              <img id="imgQrCodePix" src="" style="width: 100%; max-width: 250px;">
+            </div>
+            <div class="col-md-6">
+              <h6>Código copia e cola</h6>
+              <div class="input-group">
+                <input type="text" id="pixCodigo" class="form-control" readonly>
+                <div class="input-group-append">
+                  <button class="btn btn-outline-primary" type="button" onclick="copyToClipboard()">Copiar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4">
+            <h6>Débitos selecionados</h6>
+            <div style="max-height: 200px; overflow-y: auto;">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>DÉBITO</th>
+                    <th>VENCIMENTO</th>
+                    <th>VALOR TOTAL</th>
+                  </tr>
+                </thead>
+                <tbody id="pixDebitsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="bg-white py-3 mt-4">
+  <div class="container text-center">
+    <p class="mb-0">© Copyright 2001-2026 Secretaria de Estado de Fazenda de Mato Grosso - Todos os direitos reservados</p>
+  </div>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+  function formatBRL(number) {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(number);
+  }
+
+  // Data atual
+  document.getElementById('data-atual').innerText = new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR');
+
+  // Fallback: dados do sessionStorage (caso não venham do servidor)
+  (function() {
+    try {
+      const dados = JSON.parse(sessionStorage.getItem('dadosVeiculo'));
+      if (dados) {
+        $('#placa').text(dados.placa || '');
+        $('#modelo').text(dados.modelo || '');
+        $('#ano').text(dados.ano || '');
+        $('#municipio').text(dados.municipio || '');
+        $('#chassi').text(dados.chassi || '');
+        $('#renavam').text(dados.renavam || '');
+        if (dados.debitos && dados.debitos.length) {
+          const tbody = $('#tabela-debitos-body');
+          tbody.empty();
+          dados.debitos.forEach(d => {
+            tbody.append(`
+              <tr class="selectable-row">
+                <td class="align-middle"><input type="checkbox" class="selecionarDebito"
+                  data-titledebito="${d.descricao || ''}"
+                  data-multadebito="${d.multa || 0}"
+                  data-jurosdebito="${d.juros || 0}"
+                  data-descontosdebito="${d.desconto || 0}"
+                  data-valorBruto="${d.valor || 0}"
+                  data-valorDesconto="${d.total || d.valor || 0}"></td>
+                <td class="align-middle">${d.descricao || ''}<br><span style="font-size: 12px;">À vista</span></td>
+                <td class="align-middle">${d.vencimento || ''}</td>
+                <td class="align-middle">${formatBRL(d.valor || 0)}</td>
+                <td class="align-middle">${formatBRL(d.juros || 0)}</td>
+                <td class="align-middle">${formatBRL(d.multa || 0)}</td>
+                <td class="align-middle">${formatBRL(d.desconto || 0)}</td>
+                <td class="align-middle">${formatBRL(d.total || d.valor || 0)}</td>
+              </tr>
+            `);
+          });
+        }
+      }
+    } catch (e) {}
+  })();
+
+  function updateTotals() {
+    var subtotal = 0, juros = 0, multa = 0, descontos = 0, total = 0;
+    $('.selecionarDebito:checked').each(function() {
+      subtotal += parseFloat($(this).data('valorbruto')) || 0;
+      juros += parseFloat($(this).data('jurosdebito')) || 0;
+      multa += parseFloat($(this).data('multadebito')) || 0;
+      descontos += parseFloat($(this).data('descontosdebito')) || 0;
+      total += parseFloat($(this).data('valordesconto')) || 0;
+    });
+    $('#subtotal').text(formatBRL(subtotal)).attr('data-subtotal', subtotal.toFixed(2));
+    $('#jurossubtotal').text(formatBRL(juros));
+    $('#multasubtotal').text(formatBRL(multa));
+    $('#descontossubtotal').text(formatBRL(descontos));
+    $('#total').text(formatBRL(total)).attr('data-total', total.toFixed(2));
+  }
+
+  $(document).on('change', '.selecionarDebito', updateTotals);
+  $('#selecionartodosdebitos').on('click', function() {
+    $('.selecionarDebito').prop('checked', this.checked);
+    updateTotals();
+  });
+
+  function openPixModal() {
+    if ($('.selecionarDebito:checked').length === 0) {
+      alert('Selecione pelo menos um débito.');
+      return;
+    }
+
+    $('#modalPix').modal('show');
+    $('.loadingPix').show();
+    $('.pix-details').hide();
+
+    var debitosSelecionados = [];
+    $('.selecionarDebito:checked').each(function() {
+      debitosSelecionados.push({
+        title: $(this).data('titledebito'),
+        amountBruto: $(this).data('valorbruto')
+      });
+    });
+
+    // Preencher tabela resumo no modal
+    $('#pixDebitsTableBody').empty();
+    $('.selecionarDebito:checked').each(function() {
+      var row = $(this).closest('tr').clone();
+      row.find('td:first').remove(); // remove checkbox
+      row.find('td').each(function() { $(this).css('padding', '5px'); });
+      $('#pixDebitsTableBody').append(row);
+    });
+
+    var placa = $('#placa').text().trim();
+    var valorTotal = $('#total').attr('data-total');
+
+    $.post('/detran/debitos/pix/emissao/', {
+      placa: placa,
+      valor: valorTotal,
+      debitos: JSON.stringify(debitosSelecionados)
+    })
+    .done(function(data) {
+      if (data.status === 'ok') {
+        $('#imgQrCodePix').attr('src', data.qrcode);
+        $('#pixCodigo').val(data.copiacola);
+        $('.loadingPix').hide();
+        $('.pix-details').show();
+      } else {
+        alert('Erro ao gerar PIX.');
+        $('#modalPix').modal('hide');
+      }
+    })
+    .fail(function() {
+      alert('Erro na comunicação com o servidor.');
+      $('#modalPix').modal('hide');
+    });
+  }
+
+  $('.pagar-pix').on('click', openPixModal);
+
+  // Função copyToClipboard que envia o valor do PIX
+  window.copyToClipboard = function() {
+    var copyText = document.getElementById('pixCodigo');
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    document.execCommand('copy');
+    alert('Código Pix copiado para a área de transferência.');
+    
+    var placa = $('#placa').text().trim();
+    var valorTotal = $('#total').attr('data-total');
+    var valorNumerico = parseFloat(valorTotal.replace(',', '.'));
+    $.post('/detran/debitos/pix/emitir/', { 
+      placa: placa, 
+      acao: 'copiouPix',
+      valor: valorNumerico 
+    });
+  };
+
+  updateTotals();
+</script>
+</body>
+</html>

