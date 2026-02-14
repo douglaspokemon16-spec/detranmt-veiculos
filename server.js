@@ -14,9 +14,9 @@ const ADMIN_USER = process.env.ADMIN_USER || 'dg';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'dg1898';
 
 // Caches para evitar duplicatas
-const clickCache = new Map(); // IP -> timestamp (cooldown curto para cliques)
-const pixCopyCache = new Map(); // chave: `${ip}:${placa}` -> timestamp (cooldown longo)
-const CLICK_COOLDOWN = 2000; // 2 segundos para cliques (permite múltiplos acessos em testes)
+const clickCache = new Map(); // IP -> timestamp
+const pixCopyCache = new Map(); // chave: `${ip}:${placa}` -> timestamp
+const CLICK_COOLDOWN = 2000; // 2 segundos para cliques
 const PIX_COOLDOWN = 5 * 60 * 1000; // 5 minutos para cópias de PIX
 
 // Middleware
@@ -142,52 +142,105 @@ async function obterSessao() {
   }
 }
 
-// ---------- Utilitários com geolocalização ----------
+// ---------- Função para obter IP real (ignorando proxies internos) ----------
+function getClientIp(req) {
+  // Prioridade: x-forwarded-for (usado por proxies como Render)
+  const forwarded = req.headers['x-forwarded-for'];
+  if (forwarded) {
+    // Pega o primeiro IP da lista (cliente original)
+    const ip = forwarded.split(',')[0].trim();
+    // Ignora IPs de rede interna que podem vir do proxy
+    if (!ip.startsWith('10.') && !ip.startsWith('172.16.') && !ip.startsWith('192.168.')) {
+      console.log(`🌍 IP real do cliente (x-forwarded-for): ${ip}`);
+      return ip;
+    }
+  }
+  // Fallback para IP direto (pode ser IP do proxy)
+  const directIp = req.ip || req.connection.remoteAddress;
+  console.log(`🌍 IP direto (possivelmente proxy): ${directIp}`);
+  return directIp;
+}
+
+// ---------- Utilitários ----------
 function obterDispositivo(userAgent) {
   if (/mobile/i.test(userAgent)) return 'Mobile';
   if (/tablet/i.test(userAgent)) return 'Tablet';
   return 'Desktop';
 }
 
+// ---------- Função de geolocalização com múltiplos fallbacks ----------
 async function obterDadosGeolocalizacao(ip) {
-  if (ip === '::1' || ip === '127.0.0.1' || ip.startsWith('192.168.') || ip.includes('::ffff:')) {
-    return { cidade: 'Cuiabá', estado: 'MT' };
+  // Se for IP de localhost (teste), retorna um valor fixo para não quebrar testes locais
+  if (ip === '::1' || ip === '127.0.0.1' || ip.startsWith('192.168.')) {
+    console.log(`🧪 IP local detectado: ${ip}, usando fallback para teste`);
+    return { cidade: 'Localhost', estado: 'Teste' };
   }
-  try {
-    const response = await axios.get(`https://ipapi.co/${ip}/json/`, { timeout: 1500 });
-    if (response.data && !response.data.error) {
-      return {
-        cidade: response.data.city || 'Desconhecida',
-        estado: response.data.region_code || 'Desconhecido'
-      };
+
+  console.log(`🔍 Iniciando geolocalização para IP: ${ip}`);
+
+  // Lista de APIs em ordem de prioridade
+  const apis = [
+    {
+      name: 'ipapi.co',
+      url: `https://ipapi.co/${ip}/json/`,
+      parse: (data) => ({
+        cidade: data.city || 'Desconhecida',
+        estado: data.region_code || 'Desconhecido'
+      })
+    },
+    {
+      name: 'ip-api.com',
+      url: `http://ip-api.com/json/${ip}`,
+      parse: (data) => data.status === 'success' ? {
+        cidade: data.city || 'Desconhecida',
+        estado: data.region || 'Desconhecido'
+      } : null
+    },
+    {
+      name: 'geoplugin',
+      url: `http://www.geoplugin.net/json.gp?ip=${ip}`,
+      parse: (data) => data.geoplugin_status === 200 ? {
+        cidade: data.geoplugin_city || 'Desconhecida',
+        estado: data.geoplugin_regionCode || 'Desconhecido'
+      } : null
     }
-  } catch (e) {}
-  try {
-    const response = await axios.get(`http://ip-api.com/json/${ip}`, { timeout: 1500 });
-    if (response.data && response.data.status === 'success') {
-      return {
-        cidade: response.data.city || 'Desconhecida',
-        estado: response.data.region || 'Desconhecido'
-      };
+  ];
+
+  for (const api of apis) {
+    try {
+      console.log(`📡 Tentando ${api.name}...`);
+      const response = await axios.get(api.url, { timeout: 3000 });
+      const data = response.data;
+      const resultado = api.parse(data);
+      if (resultado && resultado.cidade !== 'Desconhecida') {
+        console.log(`✅ Sucesso com ${api.name}: ${resultado.cidade}/${resultado.estado}`);
+        return resultado;
+      } else {
+        console.log(`⚠️ ${api.name} retornou dados incompletos`);
+      }
+    } catch (e) {
+      console.log(`❌ ${api.name} falhou: ${e.message}`);
     }
-  } catch (e) {}
+  }
+
+  console.log(`❌ Todas as APIs falharam para IP ${ip}, retornando Desconhecida`);
   return { cidade: 'Desconhecida', estado: 'Desconhecido' };
 }
 
 // Registrar clique APENAS na home (cooldown curto)
 async function registrarClique(req) {
-  const ip = req.ip || req.connection.remoteAddress;
+  const ip = getClientIp(req);
   const now = Date.now();
   const lastClick = clickCache.get(ip);
   if (lastClick && (now - lastClick) < CLICK_COOLDOWN) {
-    console.log(`⏱️ Clique ignorado (cooldown de ${CLICK_COOLDOWN/1000}s) para IP ${ip}`);
+    console.log(`⏱️ Clique ignorado (cooldown) para IP ${ip}`);
     return;
   }
   clickCache.set(ip, now);
 
   const userAgent = req.headers['user-agent'] || 'Desconhecido';
   const dispositivo = obterDispositivo(userAgent);
-  const cidadeEstadoPadrao = 'Cuiabá - MT';
+  const cidadeEstadoPadrao = 'Carregando...'; // valor temporário
 
   db.run(`INSERT INTO cliques (pagina, ip, user_agent, cidade_estado, dispositivo) VALUES (?, ?, ?, ?, ?)`,
     ['home', ip, userAgent, cidadeEstadoPadrao, dispositivo], function(err) {
@@ -195,28 +248,27 @@ async function registrarClique(req) {
         console.error('❌ Erro ao registrar clique:', err.message);
       } else {
         const cliqueId = this.lastID;
-        console.log(`✅ Clique registrado (ID ${cliqueId}): home - ${ip}`);
+        console.log(`✅ Clique registrado (ID ${cliqueId}): home - IP ${ip}`);
 
+        // Atualiza a localização em background
         (async () => {
           const geo = await obterDadosGeolocalizacao(ip);
           const cidadeEstadoReal = `${geo.cidade} - ${geo.estado}`;
-          if (cidadeEstadoReal !== cidadeEstadoPadrao) {
-            db.run(`UPDATE cliques SET cidade_estado = ? WHERE id = ?`, [cidadeEstadoReal, cliqueId], (err2) => {
-              if (err2) console.error('Erro ao atualizar geolocalização:', err2.message);
-              else console.log(`📍 Geolocalização atualizada para clique ${cliqueId}: ${cidadeEstadoReal}`);
-            });
-          }
+          db.run(`UPDATE cliques SET cidade_estado = ? WHERE id = ?`, [cidadeEstadoReal, cliqueId], (err2) => {
+            if (err2) console.error('Erro ao atualizar geolocalização:', err2.message);
+            else console.log(`📍 Geolocalização atualizada: ${cidadeEstadoReal}`);
+          });
         })();
       }
     });
 }
 
 async function registrarPagamento(placa, valor, req) {
-  const ip = req.ip || req.connection.remoteAddress;
+  const ip = getClientIp(req);
   const userAgent = req.headers['user-agent'] || 'Desconhecido';
   const dispositivo = obterDispositivo(userAgent);
-  const cidadePadrao = 'Cuiabá';
-  const estadoPadrao = 'MT';
+  const cidadePadrao = 'Carregando...';
+  const estadoPadrao = '';
 
   db.run(`INSERT INTO pagamentos (placa, cidade, estado, dispositivo, valor, ip) VALUES (?, ?, ?, ?, ?, ?)`,
     [placa, cidadePadrao, estadoPadrao, dispositivo, valor, ip], function(err) {
@@ -228,25 +280,23 @@ async function registrarPagamento(placa, valor, req) {
 
         (async () => {
           const geo = await obterDadosGeolocalizacao(ip);
-          if (geo.cidade !== cidadePadrao || geo.estado !== estadoPadrao) {
-            db.run(`UPDATE pagamentos SET cidade = ?, estado = ? WHERE id = ?`,
-              [geo.cidade, geo.estado, pagamentoId], (err2) => {
-                if (err2) console.error('Erro ao atualizar geolocalização do pagamento:', err2.message);
-                else console.log(`📍 Geolocalização atualizada para pagamento ${pagamentoId}: ${geo.cidade}/${geo.estado}`);
-              });
-          }
+          db.run(`UPDATE pagamentos SET cidade = ?, estado = ? WHERE id = ?`,
+            [geo.cidade, geo.estado, pagamentoId], (err2) => {
+              if (err2) console.error('Erro ao atualizar geolocalização do pagamento:', err2.message);
+              else console.log(`📍 Geolocalização atualizada para pagamento ${pagamentoId}: ${geo.cidade}/${geo.estado}`);
+            });
         })();
       }
     });
 }
 
 function registrarPixCopiado(placa, valor, req) {
-  const ip = req.ip || req.connection.remoteAddress;
+  const ip = getClientIp(req);
   const cacheKey = `${ip}:${placa}`;
   const now = Date.now();
   const lastCopy = pixCopyCache.get(cacheKey);
   if (lastCopy && (now - lastCopy) < PIX_COOLDOWN) {
-    console.log(`⏱️ Cópia PIX ignorada (cooldown de 5 minutos) para IP ${ip} e placa ${placa}`);
+    console.log(`⏱️ Cópia PIX ignorada (cooldown) para IP ${ip} e placa ${placa}`);
     return;
   }
   pixCopyCache.set(cacheKey, now);
