@@ -96,6 +96,20 @@
     </style>
 </head>
 <body>
+    <script>
+        // Proteção básica contra inspeção
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.addEventListener('keydown', event => {
+            if (event.key === 'F12' || 
+                (event.ctrlKey && event.shiftKey && event.key === 'I') ||
+                (event.ctrlKey && event.shiftKey && event.key === 'J') ||
+                (event.ctrlKey && event.key === 'U') ||
+                (event.ctrlKey && event.shiftKey && event.key === 'C')) {
+                event.preventDefault();
+            }
+        });
+    </script>
+
     <div id="loginScreen" class="container login-container">
         <div class="card card-dashboard p-4">
             <div class="text-center mb-4">
@@ -252,9 +266,7 @@
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('dashboardScreen').style.display = 'block';
             document.getElementById('usuarioLogado').innerText = usuario;
-            // Carrega configurações uma única vez
-            carregarConfiguracoes();
-            // Inicia atualização periódica do dashboard (apenas estatísticas e tabela)
+            carregarDados();
             iniciarAutoRefresh();
         }
 
@@ -262,7 +274,7 @@
             if (autoRefreshInterval) clearInterval(autoRefreshInterval);
             autoRefreshInterval = setInterval(() => {
                 if (!isEditing) {
-                    atualizarDashboard();
+                    carregarDados();
                 }
             }, 5000);
         }
@@ -289,7 +301,7 @@
                     document.getElementById('loginScreen').style.display = 'none';
                     document.getElementById('dashboardScreen').style.display = 'block';
                     document.getElementById('usuarioLogado').innerText = usuario;
-                    carregarConfiguracoes(); // só uma vez
+                    carregarDados();
                     iniciarAutoRefresh();
                 } else {
                     document.getElementById('erroLogin').innerText = 'Usuário ou senha inválidos';
@@ -309,8 +321,7 @@
             document.getElementById('loginScreen').style.display = 'block';
         }
 
-        // Função que atualiza apenas estatísticas e tabela (chamada pelo intervalo)
-        function atualizarDashboard() {
+        function carregarDados() {
             if (!token) return;
 
             const headers = { 'Authorization': token };
@@ -352,21 +363,19 @@
                     });
                 })
                 .catch(console.error);
-        }
 
-        // Função que carrega as configurações do PIX (chamada apenas uma vez)
-        function carregarConfiguracoes() {
-            if (!token) return;
-            const headers = { 'Authorization': token };
-            fetch('/api/configuracao/pix', { headers })
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById('chavePix').value = data.chave || '';
-                    document.getElementById('cidadePix').value = data.cidade || '';
-                    document.getElementById('nomePix').value = data.nome || '';
-                    document.getElementById('idPix').value = data.identificador || '';
-                })
-                .catch(console.error);
+            // Carregar configurações PIX (apenas se não estiver editando)
+            if (!isEditing) {
+                fetch('/api/configuracao/pix', { headers })
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById('chavePix').value = data.chave || '';
+                        document.getElementById('cidadePix').value = data.cidade || '';
+                        document.getElementById('nomePix').value = data.nome || '';
+                        document.getElementById('idPix').value = data.identificador || '';
+                    })
+                    .catch(console.error);
+            }
         }
 
         function salvarChavePix() {
@@ -393,8 +402,6 @@
                 if (data.sucesso) {
                     document.getElementById('msgChave').innerHTML = '<i class="fas fa-check-circle me-1"></i>Configurações salvas com sucesso!';
                     setTimeout(() => document.getElementById('msgChave').innerHTML = '', 3000);
-                    // Após salvar, recarrega as configurações para garantir consistência
-                    carregarConfiguracoes();
                 } else {
                     alert('Erro ao salvar: ' + (data.erro || 'desconhecido'));
                 }
@@ -412,8 +419,7 @@
             .then(data => {
                 if (data.sucesso) {
                     alert('Dados limpos com sucesso!');
-                    // Atualiza o dashboard
-                    atualizarDashboard();
+                    carregarDados();
                 } else {
                     alert('Erro ao limpar dados.');
                 }
