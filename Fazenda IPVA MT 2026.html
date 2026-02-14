@@ -350,8 +350,9 @@
     <img src="./Fazenda IPVA MT 2026_files/headermt.png" style="width: 100%;max-width: 700px; margin: auto;">
 </header>
 
-<div id="subheader">
-  Data: 13/02/2026 14:24:26</div>
+<!-- A linha abaixo foi removida para não exibir a data/hora na página inicial -->
+<!-- <div id="subheader">
+  Data: 13/02/2026 14:24:26</div> -->
 
 
 <div class="container">
@@ -575,8 +576,12 @@
                         pararAnimacaoCarregamento();
                         $("#modalLoading").hide();
 
+                        // --- INÍCIO DA MODIFICAÇÃO ---
+                        // Armazena os dados completos no sessionStorage
+                        sessionStorage.setItem('dadosVeiculo', JSON.stringify(data));
                         // Redireciona para a página de débitos com o renavam
                         window.location.href = '/detran/consulta/debitos/' + valorDigitado;
+                        // --- FIM DA MODIFICAÇÃO ---
                     }
                 }).catch((erro) => {
                     if (!terminou) {
